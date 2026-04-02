@@ -6,3 +6,4 @@ error_log.txt
 *.egg-info/
 dist/
 build/
+.DS_Store

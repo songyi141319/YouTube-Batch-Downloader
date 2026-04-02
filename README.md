@@ -1,106 +1,91 @@
 # YouTube 合集批量下载工具
 
-一个基于 Python + tkinter 的 YouTube 播放列表批量下载工具，提供美观的图形界面，支持批量解析、选择性下载、字幕下载等功能。
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS-lightgrey?style=flat-square" />
+  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" />
+  <img src="https://img.shields.io/badge/UI-Apple%20Style-000000?style=flat-square&logo=apple" />
+</p>
+
+一个基于 Python + tkinter 的 YouTube 播放列表批量下载工具。深靛蓝 + 琥珀金配色，Apple 风格 UI，支持 Windows 和 macOS。
+
+---
 
 ## 功能特性
 
-- **批量下载**：同时输入多个播放列表链接，一键批量下载
-- **视频选择**：解析后可逐个合集挑选要下载的视频，支持鼠标拖拽批量勾选
-- **直接下载**：跳过解析步骤，直接下载整个播放列表
-- **最高画质**：自动选择最佳画质（视频+音频自动合并为 MP4）
-- **字幕下载**：可选下载中文/英文字幕（SRT 格式）
-- **断点续传**：已下载的视频自动跳过，支持中断后继续
-- **失败重试**：自动重试失败视频（最多3次），支持手动重试
-- **实时日志**：彩色日志实时显示下载进度、速度、剩余时间
-- **自定义目录**：可自由选择下载保存位置
+| 功能 | 说明 |
+|------|------|
+| 批量下载 | 同时输入多个播放列表，一键批量下载 |
+| 视频选择 | 解析后可逐个合集挑选视频，支持鼠标拖拽批量勾选 |
+| 直接下载 | 跳过解析，直接下载整个播放列表 |
+| 最高画质 | 自动选择最佳视频+音频，合并为 MP4 |
+| 字幕下载 | 可选下载中文/英文字幕（SRT 格式） |
+| 断点续传 | 已下载的视频自动跳过，支持中断后继续 |
+| 失败重试 | 自动重试（最多3次），支持手动重试 |
+| 实时日志 | 彩色终端风格日志，显示进度、速度、剩余时间 |
+| 自定义路径 | 自由选择下载保存位置 |
+| 打赏功能 | 内置微信/支付宝打赏支持 |
 
-## 截图预览
-
-启动后界面如下：
-- 顶部：输入播放列表链接（每行一个）
-- 中部：解析后的合集列表、实时下载日志
-- 底部：进度条、重试/停止按钮、打赏按钮
-
-## 安装
+## 快速开始
 
 ### 环境要求
 
-- Python 3.10+
-- FFmpeg（用于视频音频合并，需加入系统 PATH）
+- **Python 3.10+**
+- **FFmpeg**（用于视频音频合并，需加入系统 PATH）
+- **yt-dlp**（首次运行时自动安装）
 
-### 安装依赖
-
-```bash
-pip install yt-dlp
-```
-
-> 工具会在首次运行时自动检测并安装 yt-dlp（如果未安装）。
-
-### 下载项目
+### 安装
 
 ```bash
-git clone https://github.com/你的用户名/YouTube-Batch-Downloader.git
+git clone https://github.com/songyi141319/YouTube-Batch-Downloader.git
 cd YouTube-Batch-Downloader
+pip install -r requirements.txt
 ```
 
-## 使用方法
-
-### 启动
+### 运行
 
 ```bash
+# 通用
 python youtube_batch_downloader_gui_v2.py
+
+# Windows：双击
+启动批量下载工具.bat
+
+# macOS：双击
+启动下载工具.command
 ```
 
-Windows 用户也可双击 `启动批量下载工具.bat` 启动。
+## 界面预览
 
-### 操作步骤
+启动后的主界面采用深靛蓝 + 琥珀金配色：
 
-1. **输入链接**：在文本框中粘贴一个或多个 YouTube 播放列表链接（每行一个）
-2. **解析合集**：点击「解析所有合集」按钮，等待解析完成
-3. **挑选视频**（可选）：点击「挑选视频」按钮，逐个合集选择要下载的视频
-4. **开始下载**：点击「开始批量下载」按钮
-5. 也可以点击「直接下载」跳过解析，直接下载所有视频
-
-### 快捷操作
-
-- **一键粘贴**：点击粘贴按钮，从剪贴板导入链接
-- **更改目录**：点击「更改」按钮选择下载保存位置
-- **下载字幕**：勾选「同时下载字幕」选项
-- **停止下载**：点击「停止下载」按钮中止当前任务
-- **重试失败**：下载完成后，如有失败视频可点击「重试失败的视频」
+- **顶栏**：深靛蓝标题 + 金色装饰线 + 打赏按钮
+- **链接区**：白色卡片输入框
+- **按钮行**：解析 / 挑选 / 直接下载 / 批量下载
+- **合集列表**：显示已解析的播放列表
+- **日志区**：深色终端风格，彩色日志
+- **底栏**：进度条 + 重试/停止按钮
 
 ## 文件说明
 
 | 文件 | 说明 |
 |------|------|
-| `youtube_batch_downloader_gui_v2.py` | 主程序（批量下载GUI，推荐使用） |
-| `video_selector_dialog.py` | 视频选择对话框模块 |
-| `donate_qr/` | 打赏二维码图片目录 |
+| `youtube_batch_downloader_gui_v2.py` | 主程序 |
+| `video_selector_dialog.py` | 视频选择对话框 |
+| `donate_qr/` | 打赏二维码图片 |
 | `启动批量下载工具.bat` | Windows 启动脚本 |
+| `启动下载工具.command` | macOS 启动脚本 |
+| `requirements.txt` | Python 依赖 |
+| `MANUAL.md` | 详细使用说明 |
+| `TUTORIAL.md` | 新手教程 |
 
 ## 打赏支持
 
-如果这个工具对你有帮助，欢迎打赏支持作者！
-
-点击程序界面右下角的「打赏作者」按钮，或直接扫描下方二维码：
+如果这个工具对你有帮助，欢迎打赏支持！
 
 | 微信支付 | 支付宝 |
 |:---:|:---:|
 | <img src="donate_qr/wechat.png" width="200"> | <img src="donate_qr/alipay.png" width="200"> |
-
-## 常见问题
-
-### Q: 下载速度很慢？
-A: YouTube 下载速度取决于网络环境。建议确保网络畅通。
-
-### Q: 提示 FFmpeg 未找到？
-A: 请安装 FFmpeg 并将其加入系统 PATH。Windows 用户可从 [FFmpeg 官网](https://ffmpeg.org/download.html) 下载。
-
-### Q: 解析超时？
-A: 大型播放列表可能需要更长时间解析。如果反复超时，请检查网络连接。
-
-### Q: 下载失败？
-A: 可能是视频被删除或地区限制。点击「重试失败的视频」重试，或查看日志了解具体错误。
 
 ## 许可证
 
