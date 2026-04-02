@@ -2,8 +2,19 @@
 视频选择对话框 - 用于选择要下载的视频
 支持鼠标拖拽批量勾选
 """
+import platform
 import tkinter as tk
 from tkinter import ttk, messagebox
+
+def _ui_font():
+    _sys = platform.system()
+    if _sys == "Darwin":
+        return "PingFang SC"
+    elif _sys == "Windows":
+        return UI_FONT
+    return "sans-serif"
+
+UI_FONT = _ui_font()
 
 class VideoSelectorDialog:
     def __init__(self, parent, playlist_info):
@@ -46,7 +57,7 @@ class VideoSelectorDialog:
         tk.Label(
             title_frame,
             text=f"📹 {self.playlist_info['title']} ({len(self.playlist_info['videos'])} 个视频)",
-            font=("Microsoft YaHei UI", 12, "bold"),
+            font=(UI_FONT, 12, "bold"),
             bg=self.primary_color,
             fg="white"
         ).pack(pady=12)
@@ -62,7 +73,7 @@ class VideoSelectorDialog:
         tk.Button(
             button_frame,
             text="✓ 全选",
-            font=("Microsoft YaHei UI", 9),
+            font=(UI_FONT, 9),
             bg="#e0e0e0",
             fg="#333",
             relief=tk.FLAT,
@@ -75,7 +86,7 @@ class VideoSelectorDialog:
         tk.Button(
             button_frame,
             text="✗ 取消全选",
-            font=("Microsoft YaHei UI", 9),
+            font=(UI_FONT, 9),
             bg="#e0e0e0",
             fg="#333",
             relief=tk.FLAT,
@@ -88,7 +99,7 @@ class VideoSelectorDialog:
         tk.Button(
             button_frame,
             text="⇅ 反选",
-            font=("Microsoft YaHei UI", 9),
+            font=(UI_FONT, 9),
             bg="#e0e0e0",
             fg="#333",
             relief=tk.FLAT,
@@ -101,7 +112,7 @@ class VideoSelectorDialog:
         tk.Label(
             button_frame,
             text="快速选择:",
-            font=("Microsoft YaHei UI", 9),
+            font=(UI_FONT, 9),
             bg=self.bg_color,
             fg="#666"
         ).pack(side=tk.LEFT, padx=(20, 5))
@@ -109,7 +120,7 @@ class VideoSelectorDialog:
         tk.Button(
             button_frame,
             text="前10个",
-            font=("Microsoft YaHei UI", 9),
+            font=(UI_FONT, 9),
             bg="#e0e0e0",
             fg="#333",
             relief=tk.FLAT,
@@ -122,7 +133,7 @@ class VideoSelectorDialog:
         tk.Button(
             button_frame,
             text="前20个",
-            font=("Microsoft YaHei UI", 9),
+            font=(UI_FONT, 9),
             bg="#e0e0e0",
             fg="#333",
             relief=tk.FLAT,
@@ -136,7 +147,7 @@ class VideoSelectorDialog:
         tk.Label(
             button_frame,
             text="💡 提示: 按住鼠标左键拖动可批量勾选",
-            font=("Microsoft YaHei UI", 8),
+            font=(UI_FONT, 8),
             bg=self.bg_color,
             fg="#999"
         ).pack(side=tk.RIGHT)
@@ -178,7 +189,7 @@ class VideoSelectorDialog:
                 frame,
                 text=f"[{video['playlist_index']:02d}] {video['title']}",
                 variable=var,
-                font=("Microsoft YaHei UI", 9),
+                font=(UI_FONT, 9),
                 bg="white",
                 fg="#333",
                 activebackground="white",
@@ -197,7 +208,7 @@ class VideoSelectorDialog:
         self.info_label = tk.Label(
             main_frame,
             text=f"已选择: {len(self.playlist_info['videos'])} / {len(self.playlist_info['videos'])} 个视频",
-            font=("Microsoft YaHei UI", 9),
+            font=(UI_FONT, 9),
             bg=self.bg_color,
             fg="#666"
         )
@@ -214,7 +225,7 @@ class VideoSelectorDialog:
         tk.Button(
             bottom_frame,
             text="✓ 确定下载",
-            font=("Microsoft YaHei UI", 11, "bold"),
+            font=(UI_FONT, 11, "bold"),
             bg=self.success_color,
             fg="white",
             relief=tk.FLAT,
@@ -227,7 +238,7 @@ class VideoSelectorDialog:
         tk.Button(
             bottom_frame,
             text="✗ 取消",
-            font=("Microsoft YaHei UI", 11, "bold"),
+            font=(UI_FONT, 11, "bold"),
             bg="#e0e0e0",
             fg="#333",
             relief=tk.FLAT,

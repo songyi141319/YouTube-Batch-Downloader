@@ -24,6 +24,18 @@ from tkinter import ttk, scrolledtext, messagebox, filedialog
 
 # 配置
 import shutil
+import platform
+
+def _ui_font():
+    """根据平台选择合适的 UI 字体"""
+    _sys = platform.system()
+    if _sys == "Darwin":
+        return "PingFang SC"
+    elif _sys == "Windows":
+        return UI_FONT
+    return "sans-serif"
+
+UI_FONT = _ui_font()
 
 def _find_python():
     """自动检测 Python 路径"""
@@ -78,7 +90,7 @@ class YouTubeBatchDownloaderGUI:
         title_label = tk.Label(
             title_frame,
             text="🎬 YouTube 合集批量下载工具",
-            font=("Microsoft YaHei UI", 18, "bold"),
+            font=(UI_FONT, 18, "bold"),
             bg=self.primary_color,
             fg="white"
         )
@@ -92,7 +104,7 @@ class YouTubeBatchDownloaderGUI:
         url_frame = tk.LabelFrame(
             main_frame,
             text="📎 播放列表链接（每行一个，支持批量）",
-            font=("Microsoft YaHei UI", 10, "bold"),
+            font=(UI_FONT, 10, "bold"),
             bg=self.bg_color,
             fg="#333"
         )
@@ -107,7 +119,7 @@ class YouTubeBatchDownloaderGUI:
         
         self.url_text = tk.Text(
             url_text_frame,
-            font=("Microsoft YaHei UI", 10),
+            font=(UI_FONT, 10),
             relief=tk.FLAT,
             bg="white",
             fg="#333",
@@ -124,7 +136,7 @@ class YouTubeBatchDownloaderGUI:
         tk.Button(
             paste_btn_frame,
             text="📋 一键粘贴",
-            font=("Microsoft YaHei UI", 9),
+            font=(UI_FONT, 9),
             bg="#e0e0e0",
             fg="#333",
             relief=tk.FLAT,
@@ -151,7 +163,7 @@ class YouTubeBatchDownloaderGUI:
         self.parse_btn = tk.Button(
             url_button_frame,
             text="📋 解析所有合集",
-            font=("Microsoft YaHei UI", 10, "bold"),
+            font=(UI_FONT, 10, "bold"),
             bg=self.primary_color,
             fg="white",
             relief=tk.FLAT,
@@ -165,7 +177,7 @@ class YouTubeBatchDownloaderGUI:
         self.select_btn = tk.Button(
             url_button_frame,
             text="🎯 挑选视频",
-            font=("Microsoft YaHei UI", 10, "bold"),
+            font=(UI_FONT, 10, "bold"),
             bg="#FF9800",
             fg="white",
             relief=tk.FLAT,
@@ -180,7 +192,7 @@ class YouTubeBatchDownloaderGUI:
         self.direct_download_btn = tk.Button(
             url_button_frame,
             text="⚡ 直接下载",
-            font=("Microsoft YaHei UI", 10, "bold"),
+            font=(UI_FONT, 10, "bold"),
             bg="#9C27B0",
             fg="white",
             relief=tk.FLAT,
@@ -194,7 +206,7 @@ class YouTubeBatchDownloaderGUI:
         self.download_btn = tk.Button(
             url_button_frame,
             text="🚀 开始批量下载",
-            font=("Microsoft YaHei UI", 10, "bold"),
+            font=(UI_FONT, 10, "bold"),
             bg="#4CAF50",
             fg="white",
             relief=tk.FLAT,
@@ -209,7 +221,7 @@ class YouTubeBatchDownloaderGUI:
         tk.Button(
             url_button_frame,
             text="🗑 清空",
-            font=("Microsoft YaHei UI", 10),
+            font=(UI_FONT, 10),
             bg="#e0e0e0",
             fg="#333",
             relief=tk.FLAT,
@@ -226,7 +238,7 @@ class YouTubeBatchDownloaderGUI:
         tk.Label(
             dir_frame,
             text="保存位置:",
-            font=("Microsoft YaHei UI", 9),
+            font=(UI_FONT, 9),
             bg=self.bg_color,
             fg="#666"
         ).pack(side=tk.LEFT, padx=(0, 10))
@@ -234,7 +246,7 @@ class YouTubeBatchDownloaderGUI:
         self.dir_label = tk.Label(
             dir_frame,
             text=BASE_DOWNLOAD_DIR,
-            font=("Microsoft YaHei UI", 9),
+            font=(UI_FONT, 9),
             bg=self.bg_color,
             fg="#333",
             anchor="w"
@@ -244,7 +256,7 @@ class YouTubeBatchDownloaderGUI:
         tk.Button(
             dir_frame,
             text="更改",
-            font=("Microsoft YaHei UI", 9),
+            font=(UI_FONT, 9),
             bg="#e0e0e0",
             fg="#333",
             relief=tk.FLAT,
@@ -258,7 +270,7 @@ class YouTubeBatchDownloaderGUI:
         
         tk.Checkbutton(
             subtitle_frame, text="📝 同时下载字幕（保存到字幕子文件夹）",
-            variable=self.download_subtitles, font=("Microsoft YaHei UI", 9),
+            variable=self.download_subtitles, font=(UI_FONT, 9),
             bg=self.bg_color, fg="#333", activebackground=self.bg_color,
             selectcolor="white"
         ).pack(side=tk.LEFT)
@@ -267,7 +279,7 @@ class YouTubeBatchDownloaderGUI:
         list_frame = tk.LabelFrame(
             main_frame,
             text="📚 待下载合集列表",
-            font=("Microsoft YaHei UI", 10, "bold"),
+            font=(UI_FONT, 10, "bold"),
             bg=self.bg_color,
             fg="#333"
         )
@@ -282,7 +294,7 @@ class YouTubeBatchDownloaderGUI:
         
         self.playlist_listbox = tk.Listbox(
             list_container,
-            font=("Microsoft YaHei UI", 9),
+            font=(UI_FONT, 9),
             yscrollcommand=scrollbar.set,
             relief=tk.FLAT,
             bg="white",
@@ -298,7 +310,7 @@ class YouTubeBatchDownloaderGUI:
         log_frame = tk.LabelFrame(
             main_frame,
             text="📋 下载日志",
-            font=("Microsoft YaHei UI", 10, "bold"),
+            font=(UI_FONT, 10, "bold"),
             bg=self.bg_color,
             fg="#333"
         )
@@ -331,7 +343,7 @@ class YouTubeBatchDownloaderGUI:
         self.progress_label = tk.Label(
             progress_frame,
             text="准备就绪",
-            font=("Microsoft YaHei UI", 9),
+            font=(UI_FONT, 9),
             bg=self.bg_color,
             fg="#666"
         )
@@ -354,7 +366,7 @@ class YouTubeBatchDownloaderGUI:
         
         self.retry_btn = tk.Button(
             retry_frame, text="🔄 重试失败的视频",
-            font=("Microsoft YaHei UI", 10, "bold"),
+            font=(UI_FONT, 10, "bold"),
             bg=self.warning_color, fg="white", relief=tk.FLAT,
             cursor="hand2", command=self.retry_failed,
             padx=20, pady=8, state=tk.DISABLED
@@ -363,7 +375,7 @@ class YouTubeBatchDownloaderGUI:
 
         self.stop_btn = tk.Button(
             retry_frame, text="⏹ 停止下载",
-            font=("Microsoft YaHei UI", 10, "bold"),
+            font=(UI_FONT, 10, "bold"),
             bg=self.error_color, fg="white", relief=tk.FLAT,
             cursor="hand2", command=self.stop_download,
             padx=20, pady=8
@@ -373,7 +385,7 @@ class YouTubeBatchDownloaderGUI:
         # 打赏按钮（放在右侧）
         donate_btn = tk.Button(
             retry_frame, text="☕ 打赏作者",
-            font=("Microsoft YaHei UI", 10),
+            font=(UI_FONT, 10),
             bg="#FF6B6B", fg="white", relief=tk.FLAT,
             cursor="hand2", command=self.show_donate_dialog,
             padx=15, pady=8
@@ -488,7 +500,7 @@ class YouTubeBatchDownloaderGUI:
                     
                     if result.returncode != 0:
                         self.log(f"✗ 解析失败: {url[:50]}...", "ERROR")
-                        self.log(f"错误详情: {(result.stderr or "")[:200]}", "ERROR")
+                        self.log(f"错误详情: {(result.stderr or '')[:200]}", "ERROR")
                         continue
                     
                     playlist_data = json.loads(result.stdout)
@@ -1092,14 +1104,14 @@ class YouTubeBatchDownloaderGUI:
         header = tk.Frame(dialog, bg="#FF6B6B", height=60)
         header.pack(fill=tk.X)
         header.pack_propagate(False)
-        tk.Label(header, text="感谢您的支持！", font=("Microsoft YaHei UI", 16, "bold"),
+        tk.Label(header, text="感谢您的支持！", font=(UI_FONT, 16, "bold"),
                  bg="#FF6B6B", fg="white").pack(pady=15)
 
         content = tk.Frame(dialog, bg="#FFF5F5")
         content.pack(fill=tk.BOTH, expand=True, padx=30, pady=20)
 
         tk.Label(content, text="如果这个工具对您有帮助，欢迎打赏支持作者继续开发！",
-                 font=("Microsoft YaHei UI", 10), bg="#FFF5F5", fg="#555",
+                 font=(UI_FONT, 10), bg="#FFF5F5", fg="#555",
                  wraplength=400).pack(pady=(0, 20))
 
         # 二维码区域
@@ -1107,7 +1119,7 @@ class YouTubeBatchDownloaderGUI:
         qr_frame.pack(fill=tk.X, pady=(0, 15))
 
         # 微信收款码
-        wechat_frame = tk.LabelFrame(qr_frame, text="微信支付", font=("Microsoft YaHei UI", 10, "bold"),
+        wechat_frame = tk.LabelFrame(qr_frame, text="微信支付", font=(UI_FONT, 10, "bold"),
                                       bg="#FFF5F5", fg="#07C160", padx=10, pady=10)
         wechat_frame.pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=(0, 10))
 
@@ -1127,15 +1139,15 @@ class YouTubeBatchDownloaderGUI:
                 wechat_label.pack()
             except Exception:
                 tk.Label(wechat_frame, text="请将微信收款码\n放入 donate_qr/wechat.png",
-                         font=("Microsoft YaHei UI", 9), bg="#FFF5F5", fg="#999",
+                         font=(UI_FONT, 9), bg="#FFF5F5", fg="#999",
                          height=8).pack()
         else:
             tk.Label(wechat_frame, text="请将微信收款码\n放入 donate_qr/wechat.png",
-                     font=("Microsoft YaHei UI", 9), bg="#FFF5F5", fg="#999",
+                     font=(UI_FONT, 9), bg="#FFF5F5", fg="#999",
                      height=8).pack()
 
         # 支付宝收款码
-        alipay_frame = tk.LabelFrame(qr_frame, text="支付宝", font=("Microsoft YaHei UI", 10, "bold"),
+        alipay_frame = tk.LabelFrame(qr_frame, text="支付宝", font=(UI_FONT, 10, "bold"),
                                       bg="#FFF5F5", fg="#1677FF", padx=10, pady=10)
         alipay_frame.pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=(10, 0))
 
@@ -1150,21 +1162,21 @@ class YouTubeBatchDownloaderGUI:
                 alipay_label.pack()
             except Exception:
                 tk.Label(alipay_frame, text="请将支付宝收款码\n放入 donate_qr/alipay.png",
-                         font=("Microsoft YaHei UI", 9), bg="#FFF5F5", fg="#999",
+                         font=(UI_FONT, 9), bg="#FFF5F5", fg="#999",
                          height=8).pack()
         else:
             tk.Label(alipay_frame, text="请将支付宝收款码\n放入 donate_qr/alipay.png",
-                     font=("Microsoft YaHei UI", 9), bg="#FFF5F5", fg="#999",
+                     font=(UI_FONT, 9), bg="#FFF5F5", fg="#999",
                      height=8).pack()
 
         tk.Label(content, text="打赏金额随意，您的支持是我最大的动力！",
-                 font=("Microsoft YaHei UI", 9), bg="#FFF5F5", fg="#888").pack(pady=(10, 5))
+                 font=(UI_FONT, 9), bg="#FFF5F5", fg="#888").pack(pady=(10, 5))
 
         tk.Label(content, text="提示：将收款二维码图片(PNG格式)放入 donate_qr 文件夹即可显示",
-                 font=("Microsoft YaHei UI", 8), bg="#FFF5F5", fg="#AAA",
+                 font=(UI_FONT, 8), bg="#FFF5F5", fg="#AAA",
                  wraplength=400).pack(pady=(0, 15))
 
-        tk.Button(content, text="关闭", font=("Microsoft YaHei UI", 10),
+        tk.Button(content, text="关闭", font=(UI_FONT, 10),
                   bg="#e0e0e0", fg="#333", relief=tk.FLAT, cursor="hand2",
                   command=dialog.destroy, padx=30, pady=8).pack()
 
