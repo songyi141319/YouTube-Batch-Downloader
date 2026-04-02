@@ -54,6 +54,9 @@ class YouTubeBatchDownloaderGUI:
         self.download_thread = None
         self.failed_items = []
         self.download_subtitles = tk.BooleanVar(value=False)
+        self.use_proxy = tk.BooleanVar(value=False)
+        self.proxy_host = tk.StringVar(value="127.0.0.1")
+        self.proxy_port = tk.StringVar(value="7897")
         self.error_log_file = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "error_log.txt")
 
@@ -129,7 +132,22 @@ class YouTubeBatchDownloaderGUI:
 
         # ─── 字幕选项 ────────────────────────────────────
         ttk.Checkbutton(main, text="同时下载字幕（中英文 SRT）",
-                         variable=self.download_subtitles).pack(anchor="w", pady=(2, 4))
+                         variable=self.download_subtitles).pack(anchor="w", pady=(2, 0))
+
+        # ─── 代理设置 ────────────────────────────────────
+        proxy_row = ttk.Frame(main)
+        proxy_row.pack(fill=tk.X, pady=(2, 4))
+
+        ttk.Checkbutton(proxy_row, text="使用代理",
+                         variable=self.use_proxy).pack(side=tk.LEFT)
+
+        ttk.Label(proxy_row, text="  地址：", font=(UI_FONT, 11)).pack(side=tk.LEFT)
+        proxy_host_entry = ttk.Entry(proxy_row, textvariable=self.proxy_host, width=14, font=(UI_FONT, 11))
+        proxy_host_entry.pack(side=tk.LEFT)
+
+        ttk.Label(proxy_row, text=" 端口：", font=(UI_FONT, 11)).pack(side=tk.LEFT)
+        proxy_port_entry = ttk.Entry(proxy_row, textvariable=self.proxy_port, width=6, font=(UI_FONT, 11))
+        proxy_port_entry.pack(side=tk.LEFT)
 
         ttk.Separator(main).pack(fill=tk.X, pady=4)
 
@@ -239,6 +257,14 @@ class YouTubeBatchDownloaderGUI:
         except Exception as e:
             self.log(f"粘贴失败: {e}", "ERROR")
 
+    def _proxy_args(self):
+        """返回代理相关的 yt-dlp 参数"""
+        if self.use_proxy.get():
+            host = self.proxy_host.get().strip() or "127.0.0.1"
+            port = self.proxy_port.get().strip() or "7897"
+            return ["--proxy", f"http://{host}:{port}"]
+        return []
+
     @staticmethod
     def sanitize_filename(name):
         name = re.sub(r'[<>:"/\\|?*]', '_', name).strip()
@@ -269,8 +295,8 @@ class YouTubeBatchDownloaderGUI:
             for i, url in enumerate(urls, 1):
                 self.log(f"[{i}/{len(urls)}] 正在解析: {url[:60]}...", "INFO")
                 try:
-                    res = subprocess.run(
-                        [PYTHON_PATH, "-m", "yt_dlp", "--dump-single-json", "--flat-playlist", url],
+                    parse_cmd = [PYTHON_PATH, "-m", "yt_dlp", "--dump-single-json", "--flat-playlist"] + self._proxy_args() + [url]
+                    res = subprocess.run(parse_cmd,
                         capture_output=True, text=True, encoding="utf-8", timeout=30)
                     if res.returncode != 0:
                         self.log(f"解析失败: {url[:50]}", "ERROR"); continue
@@ -329,7 +355,7 @@ class YouTubeBatchDownloaderGUI:
                     "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best",
                     "--merge-output-format", "mp4",
                     "-o", os.path.join(BASE_DOWNLOAD_DIR, "%(playlist_title)s", "%(playlist_index)02d_%(title)s.%(ext)s"),
-                    "--yes-playlist", "--newline", url]
+                    "--yes-playlist", "--newline"] + self._proxy_args() + [url]
                 if self.download_subtitles.get():
                     cmd.extend(["--write-sub", "--write-auto-sub", "--sub-lang", "zh-Hans,zh-Hant,en", "--convert-subs", "srt"])
                 try:
@@ -411,7 +437,7 @@ class YouTubeBatchDownloaderGUI:
             cmd = [PYTHON_PATH, "-m", "yt_dlp",
                 "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best",
                 "--merge-output-format", "mp4", "-o", out,
-                "--no-playlist", "--newline", video["url"]]
+                "--no-playlist", "--newline"] + self._proxy_args() + [video["url"]]
             if self.download_subtitles.get():
                 sd = os.path.join(folder, "字幕"); os.makedirs(sd, exist_ok=True)
                 st = os.path.join(sd, f"{idx:02d}_%(title)s.%(ext)s")
@@ -420,27 +446,47 @@ class YouTubeBatchDownloaderGUI:
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                     text=True, encoding="utf-8", errors="replace")
             last_p = -1
+            error_lines = []
             for line in proc.stdout:
                 line = line.strip()
+                if not line:
+                    continue
                 if "[download]" in line and "%" in line:
                     m = re.search(r'(\d+\.\d+)%', line)
                     if m:
                         p = int(float(m.group(1))); t = p // 10
                         if t > last_p: self.log(f"  {p}%", "DETAIL"); last_p = t
-                elif "[Merger]" in line: self.log("  合并中...", "DETAIL")
+                elif "[Merger]" in line:
+                    self.log("  合并中...", "DETAIL")
+                elif "ERROR" in line or "error" in line.lower():
+                    error_lines.append(line)
             proc.wait()
             if proc.returncode == 0:
                 self.log(f"完成: [{idx:02d}] {title}", "SUCCESS")
                 pd[vid] = {"title": title, "completed": True, "timestamp": datetime.now().isoformat()}
                 with open(pf, "w", encoding="utf-8") as f: json.dump(pd, f, ensure_ascii=False, indent=2)
                 return True
-            else: raise Exception(f"yt-dlp 错误代码 {proc.returncode}")
+            else:
+                err_msg = "; ".join(error_lines[-3:]) if error_lines else f"yt-dlp 返回代码 {proc.returncode}"
+                # 分析常见错误原因
+                hint = ""
+                err_lower = err_msg.lower()
+                if "urlopen" in err_lower or "connection" in err_lower or "timed out" in err_lower or "ssl" in err_lower:
+                    hint = "（网络连接失败，请检查代理设置）"
+                elif "private" in err_lower or "unavailable" in err_lower:
+                    hint = "（视频不可用或为私有视频）"
+                elif "geo" in err_lower or "blocked" in err_lower:
+                    hint = "（地区限制）"
+                elif "removed" in err_lower or "deleted" in err_lower:
+                    hint = "（视频已被删除）"
+                raise Exception(f"{err_msg}{hint}")
         except Exception as e:
             if retry < MAX_RETRIES:
-                self.log(f"失败，{RETRY_DELAY}s 后重试 ({retry+1}/{MAX_RETRIES})", "WARN")
+                self.log(f"失败，{RETRY_DELAY}s 后重试 ({retry+1}/{MAX_RETRIES}): {str(e)[:150]}", "WARN")
                 time.sleep(RETRY_DELAY)
                 return self._dl_video(video, folder, pd, pf, retry+1)
             self.log(f"下载失败: {title}", "ERROR")
+            self.log(f"  原因: {str(e)[:200]}", "ERROR")
             pd[vid] = {"title": title, "completed": False, "error": str(e)[:200], "timestamp": datetime.now().isoformat()}
             with open(pf, "w", encoding="utf-8") as f: json.dump(pd, f, ensure_ascii=False, indent=2)
             return False
@@ -474,35 +520,46 @@ class YouTubeBatchDownloaderGUI:
     def show_donate_dialog(self):
         dlg = tk.Toplevel(self.root)
         dlg.title("打赏支持")
-        dlg.geometry("480x500")
+        dlg.geometry("520x520")
         dlg.resizable(False, False)
         dlg.transient(self.root)
         dlg.grab_set()
         dlg.update_idletasks()
-        dlg.geometry(f"+{dlg.winfo_screenwidth()//2-240}+{dlg.winfo_screenheight()//2-250}")
+        dlg.geometry(f"+{dlg.winfo_screenwidth()//2-260}+{dlg.winfo_screenheight()//2-260}")
 
         ttk.Label(dlg, text="感谢您的支持！", font=(UI_FONT, 18, "bold")).pack(pady=(20, 4))
         ttk.Label(dlg, text="如果这个工具对您有帮助，欢迎扫码打赏", font=(UI_FONT, 12)).pack(pady=(0, 16))
 
         qr_row = ttk.Frame(dlg)
-        qr_row.pack(fill=tk.X, padx=30, pady=(0, 12))
+        qr_row.pack(padx=30, pady=(0, 12))
         qr_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "donate_qr")
+
+        TARGET_SIZE = 200  # 统一目标尺寸
 
         for label, fn in [("微信支付", "wechat.png"), ("支付宝", "alipay.png")]:
             col = ttk.Frame(qr_row)
-            col.pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=6)
-            ttk.Label(col, text=label, font=(UI_FONT, 12, "bold")).pack(pady=(0, 6))
+            col.pack(side=tk.LEFT, padx=12)
+            ttk.Label(col, text=label, font=(UI_FONT, 13, "bold")).pack(pady=(0, 8))
             path = os.path.join(qr_dir, fn)
             if os.path.exists(path):
                 try:
                     img = tk.PhotoImage(file=path)
-                    w = img.width()
-                    if w > 180: img = img.subsample(max(w // 180, 1))
-                    lbl = ttk.Label(col, image=img)
-                    lbl.image = img
-                    lbl.pack()
+                    # 计算缩放因子，使两张图片统一到 TARGET_SIZE
+                    w, h = img.width(), img.height()
+                    max_dim = max(w, h)
+                    if max_dim > TARGET_SIZE:
+                        factor = max(max_dim // TARGET_SIZE, 1)
+                        img = img.subsample(factor)
+                    # 用固定大小的 Canvas 居中显示，确保对称
+                    canvas = tk.Canvas(col, width=TARGET_SIZE, height=TARGET_SIZE,
+                                       highlightthickness=0, bd=0)
+                    canvas.pack()
+                    # 居中放置图片
+                    canvas.create_image(TARGET_SIZE // 2, TARGET_SIZE // 2,
+                                        image=img, anchor="center")
+                    canvas.image = img  # 防止被垃圾回收
                 except Exception:
-                    ttk.Label(col, text=f"加载失败").pack()
+                    ttk.Label(col, text="加载失败").pack()
             else:
                 ttk.Label(col, text=f"未找到 {fn}").pack()
 
