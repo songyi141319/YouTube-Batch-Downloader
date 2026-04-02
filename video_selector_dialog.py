@@ -96,7 +96,7 @@ class VideoSelectorDialog:
         # 底部
         bottom = ttk.Frame(main)
         bottom.pack(fill=tk.X)
-        ttk.Button(bottom, text="确定下载", command=self.confirm).pack(side=tk.LEFT, padx=(0, 8))
+        ttk.Button(bottom, text="确认选择", command=self.confirm).pack(side=tk.LEFT, padx=(0, 8))
         ttk.Button(bottom, text="取消", command=self.cancel).pack(side=tk.LEFT)
 
     def on_drag_start(self, event, index):

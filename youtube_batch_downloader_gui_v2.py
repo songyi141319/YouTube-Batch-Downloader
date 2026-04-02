@@ -112,11 +112,11 @@ class YouTubeBatchDownloaderGUI:
         self.select_btn = ttk.Button(btn_row, text="挑选视频", command=self.select_videos_from_playlists, state=tk.DISABLED)
         self.select_btn.pack(side=tk.LEFT, padx=(0, 4))
 
-        self.direct_download_btn = ttk.Button(btn_row, text="直接下载", command=self.direct_download)
-        self.direct_download_btn.pack(side=tk.LEFT, padx=(0, 4))
-
         self.download_btn = ttk.Button(btn_row, text="开始批量下载", command=self.start_batch_download, state=tk.DISABLED)
         self.download_btn.pack(side=tk.LEFT, padx=(0, 4))
+
+        self.direct_download_btn = ttk.Button(btn_row, text="直接下载", command=self.direct_download)
+        self.direct_download_btn.pack(side=tk.LEFT, padx=(0, 4))
 
         ttk.Button(btn_row, text="清空", command=self.clear_urls).pack(side=tk.LEFT, padx=(0, 4))
         ttk.Button(btn_row, text="粘贴", command=self.paste_from_clipboard).pack(side=tk.RIGHT)
@@ -326,16 +326,24 @@ class YouTubeBatchDownloaderGUI:
     def select_videos_from_playlists(self):
         if not self.playlists:
             messagebox.showwarning("提示", "请先解析播放列表"); return
+        any_selected = False
         for pl in self.playlists:
             sel = VideoSelectorDialog(self.root, pl).show()
             if sel is None:
                 self.log(f"取消选择: {pl['title']}", "WARN"); continue
             pl['videos'] = sel
             self.log(f"{pl['title']}: 已选 {len(sel)} 个视频", "SUCCESS")
+            any_selected = True
         self.playlist_listbox.delete(0, tk.END)
         for pl in self.playlists:
             self.playlist_listbox.insert(tk.END, f"[{len(pl['videos'])} 个视频] {pl['title']}")
         self.download_btn.config(state=tk.NORMAL)
+        # 挑选完成后自动开始下载
+        if any_selected:
+            total = sum(len(p["videos"]) for p in self.playlists)
+            if total > 0:
+                self.log(f"选择完成，自动开始下载...", "INFO")
+                self.start_batch_download()
 
     # ── 直接下载 ──────────────────────────────────────────
     def direct_download(self):
